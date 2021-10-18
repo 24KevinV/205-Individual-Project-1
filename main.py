@@ -30,6 +30,39 @@ class Student:
         self.name = name
 
 
+class Professor:
+    def __init__(self):
+        self.name = 'New Professor'
+        self.salary = 0
+        self.courses = []
+
+    def add_courses(self, course):
+        self.courses.append(course)
+
+    def calculate_salary(self):
+        self.salary = len(self.courses) * 10000
+
+    def get_salary(self):
+        return self.salary
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
+
+
+class Course:
+    def __init__(self, title, capacity, instructor):
+        self.title = title
+        self.capacity = capacity
+        self.enrollment = 0
+        self.instructor = instructor
+
+    def __eq__(self, course):
+        return self.title == course.title
+        
+
 class Year(Enum):
     Freshman = 1
     Sophomore = 2
