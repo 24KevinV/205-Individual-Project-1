@@ -7,6 +7,15 @@ class Student:
         self.year = Year.Freshman
         self.courses = []
 
+    def __str__(self):
+        course_string = "\n"
+        if len(self.courses) == 0:
+            course_string += "\tNot enrolled in any courses :("
+        else:
+            for c in self.courses:
+                course_string += "\t" + str(c) + "\n"
+        return self.name + ", " + str(self.year) + course_string
+
     def add_course(self, course):
         if course.not_full():
             course.update_enrollment(1)
@@ -55,8 +64,18 @@ class Professor:
     def __eq__(self, other):
         return self.name == other.name
 
+    def __str__(self):
+        course_string = "\n"
+        if len(self.courses) == 0:
+            course_string += "\tNot teaching any courses :("
+        else:
+            for c in self.courses:
+                course_string += "\t" + str(c) + "\n"
+        return self.name + ", Salary: " + str(self.salary) + course_string
+
     def add_course_prof(self, course):
         self.courses.append(course)
+        self.calculate_salary()
 
     def prof_remove_course(self, course):
         while course in self.courses:
@@ -82,8 +101,12 @@ class Course:
         self.enrollment = 0
         self.instructor_name = instructor_name
 
-    def __eq__(self, other):
-        return self.title == other.title
+    # def __eq__(self, other):
+    #     return self.title == other.title
+
+    def __str__(self):
+        return self.title + ", Enrollment: " + str(self.enrollment) + "/"\
+               + str(self.capacity) + " Professor: " + self.instructor_name
 
     def update_enrollment(self, i):
         self.enrollment += i
@@ -130,12 +153,27 @@ class School:
             student = self.add_student(student_name)
         for c in self.courses:
             if c.get_title() == course_name:
-                student.add_course(c)
+                if student.add_course(c):
+                    return 0
+                return 2
+        return 1
+
+    def new_course_incorrect(self, title, capacity, instructor_name):
+        found = False
+        for p in self.professors:
+            if p.get_name == instructor_name:  # sneaky bug doesn't crash but will never be true so adds new professor
+                instructor = p
+                found = True
+        if not found:
+            instructor = self.add_professor(instructor_name)
+        new_course = Course(title, capacity, instructor_name)
+        self.courses.append(new_course)
+        self.professors[self.professors.index(instructor)].add_course_prof(new_course)
 
     def new_course(self, title, capacity, instructor_name):
         found = False
         for p in self.professors:
-            if p.get_name == instructor_name:
+            if p.get_name() == instructor_name:
                 instructor = p
                 found = True
         if not found:
@@ -183,24 +221,52 @@ class Year(Enum):
     Senior = 4
     Graduate = 5
 
+    def __str__(self):
+        return self.name
+
 
 def main():
     uvm = School()
+    print("Students and Professors are created automatically")
+    print("Courses need to be created before they can be registered for")
+    stop = False
+    while not stop:
+        choice = input("Create Course (c), Print Info (p), Register for a Course (r), Quit (q): ")
+        if choice == 'c':
+            prof = input("Professor Name: ")
+            title = input("Course Title: ")
+            try:
+                capacity = int(input("Max Enrollment (integer): "))
+            except ValueError:
+                print("Seriously? All you had to do was enter an int.")
+                capacity = 10
+            uvm.new_course(title, capacity, prof)
+        elif choice == 'p':
+            print("========== Students ==========")
+            students = uvm.get_students()
+            for s in students:
+                print(s)
 
-    uvm.add_student("Kevin")
-    uvm.add_student("Clayton")
-    uvm.add_student("Zach")
+            print("========= Professors =========")
+            professors = uvm.get_professors()
+            for p in professors:
+                print(p)
 
-    uvm.new_course("CS 205", 2, "Jason")
+            print("========== Courses ===========")
+            courses = uvm.get_courses()
+            for c in courses:
+                print(c)
+        elif choice == 'r':
+            title = input("Course Title: ")
+            name = input("Student Name: ")
+            rc = uvm.register_course(name, title)
+            if rc == 1:
+                print("Invalid Course Title")
+            elif rc == 2:
+                print("Course Full")
+        elif choice == 'q':
+            stop = True
 
-    uvm.register_course("Kevin", "CS 205")
-    uvm.register_course("Clayton", "CS 205")
-    # zach was too slow to register... what a bummer
-    uvm.register_course("Zach", "CS 205")
 
-    students = uvm.get_students()
-    for s in students:
-        print(s.get_courses)
-
-
-main()
+if __name__ == '__main__':
+    main()
