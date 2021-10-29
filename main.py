@@ -101,8 +101,8 @@ class Course:
         self.enrollment = 0
         self.instructor_name = instructor_name
 
-    # def __eq__(self, other):
-    #     return self.title == other.title
+    def __eq__(self, other):
+        return self.title == other.title
 
     def __str__(self):
         return self.title + ", Enrollment: " + str(self.enrollment) + "/"\
@@ -157,6 +157,22 @@ class School:
                     return 0
                 return 2
         return 1
+
+    def get_students_in_course(self, course_name):
+        found = False
+        for c in self.courses:
+            if c.get_title() == course_name:
+                course = c
+                found = True
+        if not found:
+            return None
+        students = []
+        for s in self.students:
+            if course in s.get_courses():
+                students.append(s)
+        if len(students) == 0:
+            students.append(None)
+        return students
 
     def new_course_incorrect(self, title, capacity, instructor_name):
         found = False
@@ -231,7 +247,8 @@ def main():
     print("Courses need to be created before they can be registered for")
     stop = False
     while not stop:
-        choice = input("Create Course (c), Print Info (p), Register for a Course (r), Quit (q): ")
+        choice = input("Create Course (c), Print Info (p), Register for a Course (r), "
+                       "Get list of students in a course (g), Quit (q): ")
         if choice == 'c':
             prof = input("Professor Name: ")
             title = input("Course Title: ")
@@ -264,6 +281,18 @@ def main():
                 print("Invalid Course Title")
             elif rc == 2:
                 print("Course Full")
+        elif choice == 'g':
+            course_name = input("Course Title: ")
+            student_list = uvm.get_students_in_course(course_name)
+            if student_list is None:
+                print(course_name + " Does Not Exist")
+            elif None in student_list:
+                print("No students in " + course_name)
+            else:
+                print("Students in " + course_name + ":")
+                for s in student_list:
+                    print(s.get_name() + ", " + str(s.get_year()))
+            print('')
         elif choice == 'q':
             stop = True
 
