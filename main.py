@@ -93,6 +93,9 @@ class Professor:
     def set_name(self, name):
         self.name = name
 
+    def get_courses(self):
+        return self.courses
+
 
 class Course:
     def __init__(self, title, capacity, instructor_name):
@@ -177,7 +180,7 @@ class School:
     def new_course_incorrect(self, title, capacity, instructor_name):
         found = False
         for p in self.professors:
-            if p.get_name == instructor_name:  # sneaky bug doesn't crash but will never be true so adds new professor
+            if p.get_name == instructor_name:  # get_name isn't actually called so always false so adds new professor
                 instructor = p
                 found = True
         if not found:
@@ -198,23 +201,30 @@ class School:
         self.courses.append(new_course)
         self.professors[self.professors.index(instructor)].add_course_prof(new_course)
 
-    def remove_student(self, student):
+    def delete_student(self, student):
         if student in self.students:
             self.students.remove(student)
+            for c in student.get_courses():
+                c.update_enrollment(-1)
             return True
         return False
 
-    def remove_course(self, course):
+    def delete_course(self, course):
         for student in self.students:
             student.student_remove_course(course)
         for professor in self.professors:
             professor.prof_remove_course(course)
 
-    def remove_professor(self, professor):
+    def delete_professor(self, professor):
         if professor in self.professors:
             self.professors.remove(professor)
             return True
         return False
+
+    def remove_all(self):
+        self.students = []
+        self.courses = []
+        self.professors = []
 
     def get_students(self):
         return self.students
